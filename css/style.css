@@ -1,3 +1,33 @@
 /* Stylesheet by Chenxiao (Atlas) Guo, 2019 */
 
-#map { height: 600px; }
+#map {
+    height: 600px;
+    width: 80%;
+    display: inline-block;
+}
+
+#panel {
+    width: 16%;
+    padding: 20px;
+    display: inline-block;
+    vertical-align: top;
+    font-family: Sans-serif;
+    text-align: center;
+}
+
+
+.range-slider {
+    width: 50%;
+}
+
+#forward {
+    float: right;
+}
+
+#reverse {
+    float: left;
+}
+
+.leaflet-popup-content p {
+    margin: 0.2em 0;
+}
