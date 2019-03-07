@@ -1,33 +1,77 @@
 /* Stylesheet by Chenxiao (Atlas) Guo, 2019 */
 
 #map {
-    height: 600px;
-    width: 80%;
-    display: inline-block;
+	height: 600px;
+	width: 80%;
+	display: inline-block;
 }
 
 #panel {
-    width: 16%;
-    padding: 20px;
-    display: inline-block;
-    vertical-align: top;
-    font-family: Sans-serif;
-    text-align: center;
+	width: 16%;
+	padding: 20px;
+	display: inline-block;
+	vertical-align: top;
+	font-family: Sans-serif;
+	text-align: center;
+	font-size: 14px;
+	color: #303030;
 }
 
+#yearLabel {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#panelContent {
+	text-align: left;
+}
 
 .range-slider {
-    width: 50%;
+	width: 60%;
+	margin-top: 16px;
+	margin-bottom: 20px;
 }
 
 #forward {
-    float: right;
+	float: right;
 }
 
 #reverse {
-    float: left;
+	float: left;
+}
+
+.skip {
+	border-radius: 10%;
+	padding: 10px 10px;
+	display: inline-block;
+	margin: 1px 1px;
+	-webkit-transition-duration: 0.3s;
+	/* Safari */
+	transition-duration: 0.3s;
+	cursor: pointer;
+	background-color: white;
+	color: black;
+	border: 0px solid #008CBA;
+}
+
+.skip:hover {
+	background-color: #DDDDDD;
 }
 
 .leaflet-popup-content p {
-    margin: 0.2em 0;
+	margin: 0.2em 0;
+}
+
+.legend {
+	line-height: 18px;
+	color: #555;
+	display: block;
+}
+
+.legend i {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-right: 8px;
+	opacity: 0.7;
 }

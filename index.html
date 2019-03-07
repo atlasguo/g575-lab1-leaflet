@@ -3,8 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
-		<title>Leaflet Map - Hurricane Irma Track</title>
-
+		<title>Leaflet Map</title>
 		<!--put your external stylesheet links here-->
 		<link rel="stylesheet" href="../css/leaflet.css">
 		<link rel="stylesheet" href="../css/style.css">
@@ -12,20 +11,22 @@
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="crossorigin=""/>
 		<link rel="stylesheet" href="../css/MarkerCluster.css" />
 		<link rel="stylesheet" href="../css/MarkerCluster.Default.css" />
-
 		<!--[if IE<9]>
-			<link rel="stylesheet" href="css/style.ie.css">
+		<link rel="stylesheet" href="css/style.ie.css">
 		<![endif]-->
 	</head>
-
 	<body>
 		<!--put your initial page content here-->
-
 		<div id="map"></div>
-    	<div id="panel"></div>
+		<div id="panel">
+			<div id="yearLabel">Number of Hurricanes <br/>in 1850 ~ 1860</div>
+			<input class="range-slider" type="range">
+			<button class="skip" id="reverse"><img src="img/reverse.png"></button>
+			<button class="skip" id="forward"><img src="img/forward.png"></button>
+			<div id="panelContent">To explore more information, move the slider or click the cities on the map. Click the layer button for CBSA polygons.</div>
+		</div>
 		<!--you can also use this space for internal scripts or stylesheets;
-		place these within <script> or <style> tags-->
-
+			place these within <script> or <style> tags-->
 		<!--put your external script links here-->
 		<script type="text/javascript" src="../lib/jquery-3.3.1.js"></script>
 		<script type="text/javascript" src="../lib/leaflet-src.js"></script>
@@ -34,6 +35,5 @@
 		<script type="text/javascript" src="../lib/leaflet-providers.js"></script>
 		<script src="../lib/leaflet.markercluster-src.js"></script>
 		<script type="text/javascript" src="../js/main.js"></script>
-
 	</body>
 </html>

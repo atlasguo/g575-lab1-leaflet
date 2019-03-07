@@ -1,123 +1,378 @@
 /* Javascript by Chenxiao (Atlas) Guo, 2019 */
 
 //calculate the radius of each proportional symbol
-function calcPropRadius(attValue) {
-    //scale factor to adjust symbol size evenly
-    var scaleFactor = 8;
-    //area based on attribute value and scale factor
-    var area = attValue * scaleFactor;
-    //radius calculated based on area
-    var radius = Math.sqrt(area/Math.PI);
+function calcPropRadius(attValue)
+{
+	//scale factor to adjust symbol size evenly
+	var scaleFactor = 50;
+	//area based on attribute value and scale factor
+	var area = attValue * scaleFactor;
+	//radius calculated based on area
+	var radius = Math.sqrt(area / Math.PI);
 
-    return radius;
+	return radius + 0.5;
 };
 
 //function to convert markers to circle markers
-function pointToLayer(feature, latlng){
-    //Determine which attribute to visualize with proportional symbols
-    var attribute = "INTENSITY";
+function pointToLayer(map, feature, latlng, attributes)
+{
+	// Assign the current attribute based on the first index of the attributes array
+	var attribute = attributes[0];
 
-    // set color for scale
-    var SS = feature.properties.SS;
-    if ( SS == 5 ) fillColor = "#FF0000";
-         else if ( SS == 4 ) fillColor = "#FFA500";
-         else if ( SS == 3 ) fillColor = "#FFFF00";
-         else if ( SS == 2 ) fillColor = "#87CEFA";
-         else if ( SS == 1 ) fillColor = "#4169E1";
-         else fillColor = "#000080";
+	//For each feature, determine its value for the selected attribute
+	var attValue = Number(feature.properties[attribute]);
 
-    var options = {
-        fillColor: fillColor,
-        color: "#FFFFFF",
-        weight: 1.5,
-        opacity: 0.8,
-        fillOpacity: 0.8
-    };
+	//console.log(attValue);
+	var options = {
+		fillColor: "#FFFFFF",
+		color: "#71d2ff",
+		weight: 1.8,
+		opacity: 0.5,
+		fillOpacity: 0.2
+	};
 
-    //For each feature, determine its value for the selected attribute
-    var attValue = Number(feature.properties[attribute]);
+	//Give each feature's circle marker a radius based on its attribute value
+	var radius = calcPropRadius(attValue);
+	options.radius = radius;
+	//create circle marker layer
+	var layer = L.circleMarker(latlng, options);
 
-    //Give each feature's circle marker a radius based on its attribute value
-    options.radius = calcPropRadius(attValue);
+	//add city to popup content string
+	var popupContent = "<b>City:</b> " + feature.properties.City + "<br/>" +
+		"<b>CBSA:</b> " + feature.properties.CBSA + "";
 
-    //create circle marker layer
-    var layer = L.circleMarker(latlng, options);
+	//replace the layer popup
+	layer.bindPopup(popupContent,
+	{
+		offset: new L.Point(0, -radius)
+	});
 
-    //build popup content string
-    var popupContent = "";
-    if (feature.properties)
-    {
-        // loop to add feature property names and values to html string
-        for (var property in feature.properties)
-        {
-            popupContent += "<p><b>" + property + ":</b> " + feature.properties[property] + "</p>";
-        }
-        layer.bindPopup(popupContent,{
-            offset: new L.Point(0,-options.radius)
-        }); //bind the popup to the circle marker
-    };
+	//build popup content string
+	var popupContent = "";
+	if (feature.properties)
+	{
+		// loop to add feature property names and values to html string
 
-    //event listeners to open popup on hover
-    layer.on({
-        mouseover: function(){
-            this.openPopup();
-        },
-        mouseout: function(){
-            this.closePopup();
-        },
-        click: function(){
-           $("#panel").html(popupContent);
-       }
-    });
+		//push each attribute name into attributes array
+		popupContent = "<b>Number of Hurricanes Within the Core-Based Statistical Area (CBSA) of Top 150 U.S. Cities: (Only in the City Layer)</b><br/><br/>"
+		for (var attribute in feature.properties)
+		{
+			//only take attributes with population values
+			if (attribute.indexOf("all") < 0)
+			{
+				//attributes.push(attribute);
+				popupContent += "<b>" + attribute + ":</b> " + feature.properties[attribute] + "<br/><br/>";
+			}
+			else
+			{
+				popupContent += "<b>" + attribute.substring(4, 10) + ":</b> " + feature.properties[attribute] + "<br/>";
+			}
+		};
+	}
+	//event listeners to open popup on hover
+	layer.on(
+	{
+		mouseover: function ()
+		{
+			this.openPopup();
+		},
+		mouseout: function ()
+		{
+			this.closePopup();
+		},
+		click: function ()
+		{
+			$("#panelContent").html(popupContent);
 
-    $("#panel").html("<br><b>Click Markers for More Information</b></br>");
-
-    //return the circle marker to the L.geoJson pointToLayer option
-    return layer;
+			map.setView([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], map.getZoom() + 1);
+		}
+	});
+	//return the circle marker to the L.geoJson pointToLayer option
+	return layer;
 };
 
 // Add circle markers for point features to the map
-function createPropSymbols(data, map){
-    //create a Leaflet GeoJSON layer and add it to the map
-    L.geoJson(data, {
-        pointToLayer: pointToLayer
-    }).addTo(map);
+function createPropSymbols(data, map, attributes)
+{
+	//create a Leaflet GeoJSON layer and add it to the map
+	var cityLayer = L.geoJson(data,
+	{
+		pointToLayer: function (feature, latlng)
+		{
+			return pointToLayer(map, feature, latlng, attributes);
+		}
+	});
+
+	cityLayer.addTo(map);
+	return cityLayer;
 };
 
+//Step 10: Resize proportional symbols according to new attribute values
+function updatePropSymbols(map, attribute)
+{
+
+	map.eachLayer(function (layer)
+	{
+		if (layer.feature && layer.feature.properties[attribute])
+		{
+			//access feature properties
+			var props = layer.feature.properties;
+
+			//update each feature's radius based on new attribute values
+			var radius = calcPropRadius(props[attribute]);
+			layer.setRadius(radius);
+		};
+	});
+};
+
+// Create new sequence controls
+function createSequenceControls(map, attributes)
+{
+	//set slider attributes
+	$('.range-slider').attr(
+	{
+		max: 16,
+		min: 0,
+		value: 0,
+		step: 1
+	});
+
+	//Step 5: click listener for buttons
+	$('.skip').click(function ()
+	{
+		//get the old index value
+		var index = $('.range-slider').val();
+
+		//Step 6: increment or decrement depending on button clicked
+		if ($(this).attr('id') == 'forward')
+		{
+			index++;
+			//Step 7: if past the last attribute, wrap around to first attribute
+			index = index > 16 ? 0 : index;
+		}
+		else if ($(this).attr('id') == 'reverse')
+		{
+			index--;
+			//Step 7: if past the first attribute, wrap around to last attribute
+			index = index < 0 ? 16 : index;
+		};
+
+		// update slider
+		$('.range-slider').val(index);
+		// pass new attribute to update symbols
+		$("#yearLabel").html("Number of Hurricanes <br/>in "+(1850 + index * 10).toString() + " ~ " + (1860 + index * 10).toString());
+
+		updatePropSymbols(map, attributes[index]);
+
+	});
+
+	// input listener for slider
+	$('.range-slider').on('input', function ()
+	{
+		// get the new index value
+		var index = $(this).val();
+		// pass new attribute to update symbols
+		$("#yearLabel").html("Number of Hurricanes <br/>in "+(1850 + index * 10).toString() + " ~ " + (1860 + index * 10).toString());
+		updatePropSymbols(map, attributes[index]);
+	});
+};
+
+// build an attributes array from the data
+function processData(data)
+{
+	//empty array to hold attributes
+	var attributes = [];
+
+	//properties of the first feature in the dataset
+	var properties = data.features[0].properties;
+
+	//push each attribute name into attributes array
+	for (var attribute in properties)
+	{
+		//only take attributes with population values
+		if (attribute.indexOf("all") > -1)
+		{
+			attributes.push(attribute);
+		};
+	};
+    return attributes;
+};
+
+function getColor(d)
+{
+	return d >= 4 ? '#d73027' :
+		d >= 3 ? '#fc8d59' :
+		d >= 2 ? '#fee090' :
+		d >= 1 ? '#e0f3f8' :
+		d >= 0.00001 ? '#91bfdb' :
+		'#4575b4';
+}
+
+function style(feature)
+{
+	//console.log(feature);
+	return {
+		fillColor: getColor(feature.properties.Average),
+		weight: 3,
+		opacity: 0.2,
+		color: 'black',
+		fillOpacity: 0.9
+	};
+}
+
+function highlightFeature(e)
+{
+	var layer = e.target;
+
+	layer.setStyle(
+	{
+		weight: 5,
+		fillOpacity: 0.6
+	});
+
+	if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge)
+	{
+		layer.bringToFront();
+	}
+}
+
+function resetHighlight(e)
+{
+	var layer = e.target;
+
+	layer.setStyle(
+	{
+		weight: 3,
+		fillOpacity: 0.9
+	});
+}
+
+function onEachFeature(feature, layer)
+{
+	//replace the layer popup
+	//add city to popup content string
+	var popupContent = "<b>CBSA:</b> " + feature.properties.NAME + "<br/>" +
+		"<b>Average Annual Number of Huricanes:</b> " + feature.properties.Average;
+
+	layer.bindPopup(popupContent,
+	{
+		offset: new L.Point(0, -5)
+	});
+
+	layer.on(
+	{
+		mouseover: function ()
+		{
+			this.openPopup();
+
+		},
+		mouseout: function ()
+		{
+			this.closePopup();
+
+		},
+	});
+
+	layer.on(
+	{
+		mouseover: highlightFeature,
+		mouseout: resetHighlight,
+	});
+}
 
 //Import GeoJSON data
-function getData(map){
-    //load the data
-    $.ajax("data/Irma_Track.geojson", {
-        dataType: "json",
-        success: function(response){
-            //call function to create proportional symbols
-            createPropSymbols(response, map);
-        }
-    });
+function getData(map)
+{
+	//load the data
+	$.ajax("data/city.json",
+	{
+		dataType: "json",
+		success: function (response)
+		{
+			var attributes = processData(response);
+
+			//call function to create proportional symbols
+			var cityLayer = createPropSymbols(response, map, attributes);
+			createSequenceControls(map, attributes);
+
+			$.ajax("data/cbsa_hurricanes.json",
+			{
+				dataType: "json",
+				success: function (response)
+				{
+					var cbsaLayer = L.geoJson(response,
+					{
+						style: style,
+						onEachFeature: onEachFeature
+					});
+
+					var Layers = {
+						"City": cityLayer,
+						"CBSA": cbsaLayer
+					};
+
+					L.control.layers(Layers).addTo(map);
+				}
+			});
+		}
+	});
+
+
 };
 
 // function to instantiate the Leaflet map
 function createMap()
 {
-    // set map
-    var map = L.map('map').setView([25, -60], 4);
+	// set map
+	var map = L.map('map').setView([37, -90], 4);
 
-    // add the NASA Earth Night Map
-    var NASAGIBS_ViirsEarthAtNight2012 = L.tileLayer('https://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
-    	attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS), operated by the NASA/GSFC/Earth Science Data and Information System (<a href="https://earthdata.nasa.gov">ESDIS</a>) with funding provided by NASA/HQ.',
-    	bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
-    	minZoom: 1,
-    	maxZoom: 8,
-    	format: 'jpg',
-    	time: '',
-    	tilematrixset: 'GoogleMapsCompatible_Level'
-    });
+	// add the dark matter map
+	var CartoDB_DarkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+	{
+		attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+		subdomains: 'abcd',
+		maxZoom: 19
+	});
 
-    NASAGIBS_ViirsEarthAtNight2012.addTo(map);
+	CartoDB_DarkMatter.addTo(map);
 
 	// call getData function
 	getData(map);
+
+	var legend = L.control(
+	{
+		position: 'bottomright'
+	});
+
+	legend.onAdd = function (map)
+	{
+		var div = L.DomUtil.create('div', 'info legend'),
+			grades = [0, 0.00001, 1, 2, 3, 4],
+			labels = ["No Hurricane","0~1","1~2","2~3","3~4","4~5"];
+
+		// loop through our density intervals and generate a label with a colored square for each interval
+		for (var i = 0; i < grades.length; i++)
+		{
+			div.innerHTML +=
+				'<i style="background:' + getColor(grades[i]) + '"></i> ' +
+				labels[i] + '<br>' ;
+		}
+		return div;
+	};
+
+	map.on('baselayerchange', function (e)
+	{
+		if (e.name == "CBSA")
+		{
+			document.getElementById("panel").style.visibility = "hidden";
+			legend.addTo(map);
+		}
+		else
+		{
+			document.getElementById("panel").style.visibility = "visible";
+			legend.remove();
+		}
+	});
 };
 
 $(document).ready(createMap);
