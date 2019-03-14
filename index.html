@@ -3,7 +3,8 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width">
-		<title>Leaflet Map</title>
+		<title>Visualizing Historical Hurricanes</title>
+		<link rel="shortcut icon" href="../img/icon.png">
 		<!--put your external stylesheet links here-->
 		<link rel="stylesheet" href="../css/leaflet.css">
 		<link rel="stylesheet" href="../css/style.css">
@@ -17,14 +18,17 @@
 	</head>
 	<body>
 		<!--put your initial page content here-->
-		<div id="map"></div>
-		<div id="panel">
-			<div id="yearLabel">Number of Hurricanes <br/>in 1850 ~ 1860</div>
-			<input class="range-slider" type="range">
-			<button class="skip" id="reverse"><img src="img/reverse.png"></button>
-			<button class="skip" id="forward"><img src="img/forward.png"></button>
-			<div id="panelContent">To explore more information, move the slider or click the cities on the map. Click the layer button for CBSA polygons.</div>
+
+		<div id="panel1">
+			<div id="panelStarter">
+				<div id="yearLabel">Hurricanes in 1850 ~ 1860</div>
+
+			</div>
+			</br>
+			<div id="panelContent">This interactive map shows the number of historical hurricanes of top 150 U.S cities (counted using core-based statistical area) by decade. A proportional-point city layer and a choropleth CBSA layer are provided. </br></br><b>Data Sourse:</b> HURDAT2 from NOAA</div>
+			<div id="chartContainer" style="height: 200px; width: 100%;"></div>
 		</div>
+		<div id="map"></div>
 		<!--you can also use this space for internal scripts or stylesheets;
 			place these within <script> or <style> tags-->
 		<!--put your external script links here-->
@@ -34,6 +38,8 @@
 		<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
 		<script type="text/javascript" src="../lib/leaflet-providers.js"></script>
 		<script src="../lib/leaflet.markercluster-src.js"></script>
+		<script src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
+		<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
 		<script type="text/javascript" src="../js/main.js"></script>
 	</body>
 </html>

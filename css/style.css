@@ -6,9 +6,9 @@
 	display: inline-block;
 }
 
-#panel {
+#panel1 {
 	width: 16%;
-	padding: 20px;
+	padding: 15px;
 	display: inline-block;
 	vertical-align: top;
 	font-family: Sans-serif;
@@ -18,7 +18,7 @@
 }
 
 #yearLabel {
-	font-size: 18px;
+	font-size: 14px;
 	font-weight: bold;
 }
 
@@ -27,9 +27,20 @@
 }
 
 .range-slider {
-	width: 60%;
-	margin-top: 16px;
-	margin-bottom: 20px;
+	width: 220px;
+	margin-top: 10px;
+	margin-bottom: 30px;
+}
+
+.sequence-control-container {
+    width: 350px;
+    height: 30px;
+
+    padding: 10px;
+    line-height: 50px;
+    text-align: center;
+    border: solid gray 0px;
+	margin-bottom: 10px;
 }
 
 #forward {
@@ -42,20 +53,20 @@
 
 .skip {
 	border-radius: 10%;
-	padding: 10px 10px;
+	padding : 3px 5px;
 	display: inline-block;
 	margin: 1px 1px;
 	-webkit-transition-duration: 0.3s;
 	/* Safari */
 	transition-duration: 0.3s;
 	cursor: pointer;
-	background-color: white;
+	background-color: #505050;
 	color: black;
-	border: 0px solid #008CBA;
+	border: 0px solid grey;
 }
 
 .skip:hover {
-	background-color: #DDDDDD;
+	background-color: #CCCCCC;
 }
 
 .leaflet-popup-content p {

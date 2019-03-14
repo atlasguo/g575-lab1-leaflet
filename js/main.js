@@ -1,10 +1,12 @@
+
+
 /* Javascript by Chenxiao (Atlas) Guo, 2019 */
 
 //calculate the radius of each proportional symbol
 function calcPropRadius(attValue)
 {
 	//scale factor to adjust symbol size evenly
-	var scaleFactor = 50;
+	var scaleFactor = 70;
 	//area based on attribute value and scale factor
 	var area = attValue * scaleFactor;
 	//radius calculated based on area
@@ -47,28 +49,7 @@ function pointToLayer(map, feature, latlng, attributes)
 		offset: new L.Point(0, -radius)
 	});
 
-	//build popup content string
-	var popupContent = "";
-	if (feature.properties)
-	{
-		// loop to add feature property names and values to html string
 
-		//push each attribute name into attributes array
-		popupContent = "<b>Number of Hurricanes Within the Core-Based Statistical Area (CBSA) of Top 150 U.S. Cities: (Only in the City Layer)</b><br/><br/>"
-		for (var attribute in feature.properties)
-		{
-			//only take attributes with population values
-			if (attribute.indexOf("all") < 0)
-			{
-				//attributes.push(attribute);
-				popupContent += "<b>" + attribute + ":</b> " + feature.properties[attribute] + "<br/><br/>";
-			}
-			else
-			{
-				popupContent += "<b>" + attribute.substring(4, 10) + ":</b> " + feature.properties[attribute] + "<br/>";
-			}
-		};
-	}
 	//event listeners to open popup on hover
 	layer.on(
 	{
@@ -82,7 +63,55 @@ function pointToLayer(map, feature, latlng, attributes)
 		},
 		click: function ()
 		{
+			//			console.log("1");
+
+			//build popup content string
+			var popupContent = "";
+			if (feature.properties)
+			{
+				// loop to add feature property names and values to html string
+
+				//push each attribute name into attributes array
+				popupContent = "";
+				var dataPoints = [];
+				for (var attribute in feature.properties)
+				{
+					//only take attributes with population values
+
+
+					if (attribute.indexOf("all") < 0)
+					{
+						//attributes.push(attribute);
+						popupContent += "<b>" + attribute + ":</b> " + feature.properties[attribute] + "<br/><br/>";
+					}
+					else
+					{
+						//popupContent += "<b>" + attribute.substring(4, 8) + ":</b> " + feature.properties[attribute] + "<br/>";
+						dataPoints.push(
+						{
+							x: Number(attribute.substring(4, 8)),
+							y: Number(feature.properties[attribute])
+						});
+					}
+
+				};
+				//console.log(dataPoints);
+
+			}
+			popupContent += "<b>Number of Historical Hurricanes Within the Core-Based Statistical Area (CBSA) by Decade:</b><br/><br/>"
 			$("#panelContent").html(popupContent);
+
+			var options = {
+
+				animationEnabled: true,
+				exportEnabled: false,
+				data: [
+				{
+					type: "spline", //change it to line, area, column, pie, etc
+					dataPoints: dataPoints
+				}]
+			};
+			$("#chartContainer").CanvasJSChart(options);
 
 			map.setView([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], map.getZoom() + 1);
 		}
@@ -107,7 +136,7 @@ function createPropSymbols(data, map, attributes)
 	return cityLayer;
 };
 
-//Step 10: Resize proportional symbols according to new attribute values
+// Resize proportional symbols according to new attribute values
 function updatePropSymbols(map, attribute)
 {
 
@@ -128,6 +157,24 @@ function updatePropSymbols(map, attribute)
 // Create new sequence controls
 function createSequenceControls(map, attributes)
 {
+	var SequenceControl = L.Control.extend({
+        options: {
+            position: 'bottomleft'
+        },onAdd: function (map) {
+            // create the control container div with a particular class name
+            var container = L.DomUtil.create('div', 'sequence-control-container');
+
+            // ... initialize other DOM elements, add listeners, etc.
+			//create range input element (slider)
+			$(container).append('<input class="range-slider" type="range">');
+			$(container).append('<button class="skip" id="reverse"><img src="img/reverse.png"></button>');
+            $(container).append('<button class="skip" id="forward"><img src="img/forward.png"></button>');
+			L.DomEvent.disableClickPropagation(container);
+            return container;
+        }
+    });
+
+    map.addControl(new SequenceControl());
 	//set slider attributes
 	$('.range-slider').attr(
 	{
@@ -137,7 +184,7 @@ function createSequenceControls(map, attributes)
 		step: 1
 	});
 
-	//Step 5: click listener for buttons
+	//click listener for buttons
 	$('.skip').click(function ()
 	{
 		//get the old index value
@@ -160,7 +207,7 @@ function createSequenceControls(map, attributes)
 		// update slider
 		$('.range-slider').val(index);
 		// pass new attribute to update symbols
-		$("#yearLabel").html("Number of Hurricanes <br/>in "+(1850 + index * 10).toString() + " ~ " + (1860 + index * 10).toString());
+		$("#yearLabel").html("Hurricanes in " + (1850 + index * 10).toString() + " ~ " + (1860 + index * 10).toString());
 
 		updatePropSymbols(map, attributes[index]);
 
@@ -172,7 +219,7 @@ function createSequenceControls(map, attributes)
 		// get the new index value
 		var index = $(this).val();
 		// pass new attribute to update symbols
-		$("#yearLabel").html("Number of Hurricanes <br/>in "+(1850 + index * 10).toString() + " ~ " + (1860 + index * 10).toString());
+		$("#yearLabel").html("Hurricanes in " + (1850 + index * 10).toString() + " ~ " + (1860 + index * 10).toString());
 		updatePropSymbols(map, attributes[index]);
 	});
 };
@@ -195,7 +242,7 @@ function processData(data)
 			attributes.push(attribute);
 		};
 	};
-    return attributes;
+	return attributes;
 };
 
 function getColor(d)
@@ -252,7 +299,7 @@ function onEachFeature(feature, layer)
 	//replace the layer popup
 	//add city to popup content string
 	var popupContent = "<b>CBSA:</b> " + feature.properties.NAME + "<br/>" +
-		"<b>Average Annual Number of Huricanes:</b> " + feature.properties.Average;
+		"<b>Annual Average Number of Huricanes:</b> " + feature.properties.Average;
 
 	layer.bindPopup(popupContent,
 	{
@@ -271,6 +318,61 @@ function onEachFeature(feature, layer)
 			this.closePopup();
 
 		},
+		click: function ()
+		{
+			//console.log("2");
+			if (feature.properties)
+			{
+				// loop to add feature property names and values to html string
+
+				//push each attribute name into attributes array
+				popupContent = "";
+
+				popupContent += "<b>" + "CBSA" + ":</b> " + feature.properties.NAME + "<br/><br/>";
+				popupContent += "<b>" + "Annual Average Number of Hurricanes" + ":</b> " + feature.properties.Average + "<br/><br/>";
+
+				var dataPoints = [];
+				var years=1850;
+				for (var attribute in feature.properties)
+				{
+					//only take attributes with population values
+
+					//console.log(attribute.indexOf("join"));
+					//popupContent += "<b>" + attribute + ":</b> " + feature.properties[attribute] + "<br/><br/>";
+
+
+					if (attribute.indexOf("join") != -1)
+					{
+						//popupContent += "<b>" + attribute.substring(4, 8) + ":</b> " + feature.properties[attribute] + "<br/>";
+						dataPoints.push(
+						{
+							x: years,
+							y: Number(feature.properties[attribute])
+						});
+						years+=10;
+					}
+
+				};
+				//console.log(dataPoints);
+			}
+
+			popupContent += "<b>Decadal Number of Historical Hurricanes Within the Core-Based Statistical Area (CBSA):</b><br/><br/>"
+			$("#panelContent").html(popupContent);
+
+			var options = {
+
+				animationEnabled: true,
+				exportEnabled: false,
+				data: [
+				{
+					type: "spline", //change it to line, area, column, pie, etc
+					dataPoints: dataPoints
+				}]
+			};
+			$("#chartContainer").CanvasJSChart(options);
+
+			//map.setView([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], map.getZoom() + 1);
+		}
 	});
 
 	layer.on(
@@ -348,28 +450,39 @@ function createMap()
 	{
 		var div = L.DomUtil.create('div', 'info legend'),
 			grades = [0, 0.00001, 1, 2, 3, 4],
-			labels = ["No Hurricane","0~1","1~2","2~3","3~4","4~5"];
+			labels = ["No Hurricane", "0~1", "1~2", "2~3", "3~4", "4~5"];
 
 		// loop through our density intervals and generate a label with a colored square for each interval
 		for (var i = 0; i < grades.length; i++)
 		{
 			div.innerHTML +=
 				'<i style="background:' + getColor(grades[i]) + '"></i> ' +
-				labels[i] + '<br>' ;
+				labels[i] + '<br>';
 		}
 		return div;
 	};
 
 	map.on('baselayerchange', function (e)
 	{
+		//var temp_yearLabel;
 		if (e.name == "CBSA")
 		{
-			document.getElementById("panel").style.visibility = "hidden";
+			//temp_yearLabel=document.getElementById("yearLabel").textContent;
+			$("#yearLabel").html("(Slider only available for cities)");
+			//document.getElementById("slider").disabled = true;
+			document.getElementsByClassName("sequence-control-container")[0].style.visibility = "hidden" ;
+			//document.getElementById("forward").style.visibility = "hidden" ;
+			//document.getElementById("panelStarter").style.visibility = "hidden";
 			legend.addTo(map);
 		}
 		else
 		{
-			document.getElementById("panel").style.visibility = "visible";
+			var index = document.getElementsByClassName("sequence-control-container")[0].value;
+			$("#yearLabel").html("Slide to change the Decades");
+			//document.getElementById("sequence-control-container").disabled = false;
+			document.getElementsByClassName("sequence-control-container")[0].style.visibility = "visible";
+			//document.getElementById("forward").style.visibility = "visible";
+			//document.getElementById("panelStarter").style.visibility = "visible";
 			legend.remove();
 		}
 	});
