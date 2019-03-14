@@ -6,13 +6,13 @@
 	display: inline-block;
 }
 
-#panel1 {
+#panel {
 	width: 16%;
 	padding: 15px;
 	display: inline-block;
 	vertical-align: top;
 	font-family: Sans-serif;
-	text-align: center;
+	
 	font-size: 14px;
 	color: #303030;
 }
@@ -20,10 +20,22 @@
 #yearLabel {
 	font-size: 14px;
 	font-weight: bold;
+	color: #BBBBBB;
+	margin-bottom: 15px;
 }
 
 #panelContent {
 	text-align: left;
+}
+
+#starter {
+	font-size: 15px;
+	color: #1010BB;
+}
+
+#chartContainer {
+	height: 200px;
+	width: 100%;
 }
 
 .range-slider {
@@ -33,14 +45,13 @@
 }
 
 .sequence-control-container {
-    width: 350px;
-    height: 30px;
-
-    padding: 10px;
-    line-height: 50px;
-    text-align: center;
-    border: solid gray 0px;
-	margin-bottom: 10px;
+	width: 350px;
+	height: 50px;
+	padding: 10px;
+	line-height: 0px;
+	text-align: center;
+	border: solid gray 0px;
+	margin-bottom: 20px;
 }
 
 #forward {
@@ -53,11 +64,10 @@
 
 .skip {
 	border-radius: 10%;
-	padding : 3px 5px;
+	padding: 3px 5px;
 	display: inline-block;
 	margin: 1px 1px;
 	-webkit-transition-duration: 0.3s;
-	/* Safari */
 	transition-duration: 0.3s;
 	cursor: pointer;
 	background-color: #505050;
@@ -74,9 +84,11 @@
 }
 
 .legend {
-	line-height: 18px;
-	color: #555;
+	line-height: 23px;
 	display: block;
+	font-size: 14px;
+	font-weight: bold;
+	color: #BBBBBB;
 }
 
 .legend i {
